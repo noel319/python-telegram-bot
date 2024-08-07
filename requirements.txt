@@ -1,2 +1,6 @@
 aiogram
 python-dotenv
+sqlalchemy
+asyncpg
+pydantic-settings
+Pillow

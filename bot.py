@@ -1,38 +1,41 @@
-import asyncio
+from aiogram import Bot, Dispatcher
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from src.middleware.reminder_middleware import ReminderMiddleware
 import logging
 
-from aiogram import Bot, Dispatcher
+# Initialize bot and dispatcher
+bot = Bot(token='YOUR_TELEGRAM_BOT_TOKEN')
+storage = MemoryStorage()
+dp = Dispatcher(bot, storage=storage)
+scheduler = AsyncIOScheduler()
 
-from config import Config, load_config
-from src.handlers import echo
+# Add handlers to dispatcher using the utility function
+from src.utils.set_bot_commands import register_handlers
+register_handlers(dp)
 
+# Error handler
+@dp.errors_handler()
+async def error_handler(update, exception):
+    if isinstance(exception, Exception):
+        logging.error(f"An error occurred: {exception}")
+        try:
+            await bot.send_message(update.message.chat.id, "An error occurred, try again later.")
+        except Exception as e:
+            logger.error(f"Failed to send error message: {e}")
+    return True
 
-logger = logging.getLogger(__name__)
+if __name__ == '__main__':
+    # Setup database
+    from models.db import setup_db
+    setup_db()
 
+    # Setup scheduler
+    scheduler.start()
 
-async def main():
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(filename)s:%(lineno)d #%(levelname)-8s "
-        "[%(asctime)s] - %(name)s - %(message)s",
-    )
+    # Add middleware
+    dp.middleware.setup(ReminderMiddleware())
 
-    logger.info("Starting bot")
-
-    config: Config = load_config()
-
-    bot: Bot = Bot(token=config.tg_bot.token, parse_mode="HTML")
-    dp: Dispatcher = Dispatcher()
-
-    dp.include_router(echo.router)
-
-    await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
-
-
-if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except (KeyboardInterrupt, SystemExit):
-        logger.info("Bot stopped")
-
+    # Start polling
+    from aiogram import executor
+    executor.start_polling(dp, skip_updates=True)

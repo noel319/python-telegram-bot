@@ -4,6 +4,7 @@ from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command
 from src.utils.fsm import UserData
+from src.utils.database import add_user
 
 router = Router()
 
@@ -22,5 +23,6 @@ async def process_name(message: types.Message, state: FSMContext):
 async def process_age(message: types.Message, state: FSMContext):
     await state.update_data(age=message.text)
     user_data = await state.get_data()
+    add_user(user_data['name'], user_data['age'])
     await message.answer(f"Your name is {user_data['name']} and you are {user_data['age']} years old.")
     await state.clear()

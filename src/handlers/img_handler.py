@@ -2,13 +2,14 @@
 
 from aiogram import types, Router
 from aiogram.types import ContentType
+from aiogram.filters import Command
 from PIL import Image
 import aiohttp
 import io
 
 router = Router()
 
-@router.message(ContentType.PHOTO)
+@router.message(Command(ContentType.PHOTO))
 async def handle_image(message: types.Message):
     try:
         photo = message.photo[-1]

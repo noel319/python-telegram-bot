@@ -2,7 +2,7 @@
 
 import asyncio
 from bot import bot, dp
-from handlers import register_handlers
+from src.handlers import register_handlers
 
 async def main():
     register_handlers(dp)

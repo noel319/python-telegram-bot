@@ -4,3 +4,6 @@ sqlalchemy
 asyncpg
 pydantic-settings
 Pillow
+loguru
+requests
+apscheduler

@@ -7,4 +7,4 @@ router = Router()
 
 @router.message(Command("help"))
 async def send_help(message: types.Message):
-    await message.answer("Available commands: /start, /help, /echo, /photo")
+    await message.answer("Available commands: /start, /help, /echo, /photo /weather /chat /users /")
